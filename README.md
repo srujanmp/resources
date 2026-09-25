@@ -1,24 +1,28 @@
-# Technical Interview Preparation Guide
+# Placement Preparation Guide
 ---
 
-## 1. Aptitude & Logical Reasoning
-- [IndiaBix - Logical & Quantitative Reasoning](https://www.indiabix.com/)
+## 1. Group Discussion
+- Be prepared to articulate your thoughts clearly, listen actively, and collaborate effectively. Do not dominate the conversation or remain completely silent.
 
-## 2. SQL & Database Queries
+## 2. Aptitude & Logical Reasoning
+- [IndiaBix - Logical & Quantitative Reasoning Luck*](https://www.indiabix.com/)
+
+## 3. SQL & Database Queries
 - [LeetCode - Top SQL 50 Study Plan](https://leetcode.com/studyplan/top-sql-50/)
 
-## 3. Core Computer Science Fundamentals
+## 4. Core Computer Science Fundamentals
 - [Computer Networks (CN)](./CN.pdf)
 - [Database Management Systems (DBMS)](./DBMS.pdf)
 - [Object-Oriented Programming (OOPS)](./OOPS.pdf)
 - [Operating Systems (OS)](./OS.pdf)
 
-## 4. Coding & Algorithms
+## 5. Coding & Algorithms
 - [NeetCode 150 Practice](https://neetcode.io/practice?tab=neetcode150)
+- [Hackerrank](https://www.hackerrank.com/domains/algorithms)
 
-## 5. System Design
-- [System Design Guidelines](./SYSTEM_DESIGN.md)
+## 6. System Design
+- [System Design Study](./SYSTEM_DESIGN.md)
 
-## 6. Interview Preparation
-- **Self Introduction:** A concise summary of your background, experience, and career objectives.
-- **Project Discussion:** Know your project well and understand it.
+## 7. Interview Preparation
+- **Self-Introduction:** Prepare a concise summary of your background, experience, and career objectives.
+- **Project Discussion:** Thoroughly understand your projects and be prepared to discuss them in detail.
