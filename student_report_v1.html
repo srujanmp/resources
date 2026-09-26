@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Candidate Assessment Report</title>
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    --bg: #000000;
+    --fg: #ffffff;
+    --muted: #888888;
+    --border: #333333;
+    --border-strong: #ffffff;
+    --surface: #111111;
+    --input-bg: #0a0a0a;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    margin: 0;
+    padding: 48px 16px;
+  }
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .header-mark {
+    width: 0;
+    height: 0;
+    border-left: 9px solid transparent;
+    border-right: 9px solid transparent;
+    border-bottom: 16px solid #fff;
+  }
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .subtitle {
+    margin: 6px 0 28px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 0 0 16px;
+  }
+  .row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .row:last-child { margin-bottom: 0; }
+  .field {
+    flex: 1;
+    min-width: 160px;
+    display: flex;
+    flex-direction: column;
+  }
+  label {
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #ccc;
+  }
+  input, select, textarea {
+    padding: 9px 11px;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: inherit;
+    background: var(--input-bg);
+    color: var(--fg);
+    transition: border-color 0.12s ease;
+  }
+  input::placeholder, textarea::placeholder {
+    color: #555;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--border-strong);
+  }
+  textarea {
+    min-height: 72px;
+    resize: vertical;
+  }
+  .skills-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  select.skill-rating {
+    font-weight: 600;
+    cursor: pointer;
+  }
+  select.skill-rating[data-val="Strong"] {
+    background: #0d1f13; border-color: #17c964; color: #3ddc84;
+  }
+  select.skill-rating[data-val="Good"] {
+    background: #241c0a; border-color: #f5a623; color: #ffbf47;
+  }
+  select.skill-rating[data-val="Needs Practice"] {
+    background: #240d0c; border-color: #ee0000; color: #ff5c5c;
+  }
+  select.skill-rating[data-val="Select"] {
+    background: var(--input-bg); border-color: var(--border); color: var(--muted);
+  }
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+  button {
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: opacity 0.12s ease, background 0.12s ease;
+  }
+  button:active { opacity: 0.85; }
+  .btn-primary {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+  }
+  .btn-primary:hover { background: #dcdcdc; }
+  .btn-secondary {
+    background: transparent;
+    color: #fff;
+    border-color: var(--border-strong);
+  }
+  .btn-secondary:hover { background: var(--surface); }
+  .btn-email {
+    background: transparent;
+    color: #ff5c5c;
+    border-color: #ff5c5c;
+  }
+  .btn-email:hover { background: #240d0c; }
+  .toast {
+    font-size: 12px;
+    font-weight: 500;
+    color: #3ddc84;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .toast.show { opacity: 1; }
+  .hint {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 12px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="header-mark"></div>
+    <h2>Candidate Assessment Report</h2>
+  </div>
+  <p class="subtitle">Evaluate candidate technical competency and export/send the interview report.</p>
+
+  <div class="card">
+    <div class="section-title">Candidate</div>
+    <div class="row">
+      <div class="field">
+        <label for="candidateName">Candidate Name</label>
+        <input type="text" id="candidateName" placeholder="e.g. Motor Hegde" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="candidateUSN">Candidate USN</label>
+        <input type="text" id="candidateUSN" placeholder="e.g. NNM23IS109" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="interviewDay">Interview Day</label>
+        <select id="interviewDay">
+          <option value="Select">Select</option>
+          <option value="Monday">Monday</option>
+          <option value="Tuesday">Tuesday</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Domain Skill Assessment</div>
+    <div class="skills-grid">
+      <div class="field">
+        <label for="ratingCs">CS Fundamentals (DBMS, CN, OOPS, OS)</label>
+        <select id="ratingCs" class="skill-rating" data-val="Select">
+          <option value="Select">Select</option><option value="Strong">Strong</option><option value="Good">Good</option><option value="Needs Practice">Needs Practice</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="ratingCoding">Coding Questions</label>
+        <select id="ratingCoding" class="skill-rating" data-val="Select">
+          <option value="Select">Select</option><option value="Strong">Strong</option><option value="Good">Good</option><option value="Needs Practice">Needs Practice</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="ratingSystem">System Design</label>
+        <select id="ratingSystem" class="skill-rating" data-val="Select">
+          <option value="Select">Select</option><option value="Strong">Strong</option><option value="Good">Good</option><option value="Needs Practice">Needs Practice</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="ratingSql">SQL</label>
+        <select id="ratingSql" class="skill-rating" data-val="Select">
+          <option value="Select">Select</option><option value="Strong">Strong</option><option value="Good">Good</option><option value="Needs Practice">Needs Practice</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="ratingComm">Communication</label>
+        <select id="ratingComm" class="skill-rating" data-val="Select">
+          <option value="Select">Select</option><option value="Strong">Strong</option><option value="Good">Good</option><option value="Needs Practice">Needs Practice</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Qualitative Feedback</div>
+    <div class="field" style="margin-bottom: 12px;">
+      <label for="textStrengths">Strengths</label>
+      <textarea id="textStrengths" placeholder="Key technical strengths and problem-solving highlights..."></textarea>
+    </div>
+    <div class="field" style="margin-bottom: 12px;">
+      <label for="textWeaknesses">Weaknesses</label>
+      <textarea id="textWeaknesses" placeholder="Areas requiring improvement or concept gaps..."></textarea>
+    </div>
+    <div class="field">
+      <label for="textRemarks">Remarks</label>
+      <textarea id="textRemarks" placeholder="Final interview recommendations and overall observations..."></textarea>
+    </div>
+  </div>
+
+  <div class="buttons">
+    <button id="btnCopy" class="btn-secondary" type="button">Copy Text</button>
+    <button id="btnDownload" class="btn-primary" type="button">Download as .txt</button>
+    <button id="btnEmail" class="btn-email" type="button">Send Email</button>
+    <span id="toast" class="toast">Copied!</span>
+  </div>
+  <div class="hint">Send Email opens Gmail (mail.google.com) in a new tab, pre-filled to the student's USN address with the admin address CC'd.</div>
+</div>
+
+<script>
+  const els = {
+    name: document.getElementById('candidateName'),
+    usn: document.getElementById('candidateUSN'),
+    day: document.getElementById('interviewDay'),
+    ratingCs: document.getElementById('ratingCs'),
+    ratingCoding: document.getElementById('ratingCoding'),
+    ratingSystem: document.getElementById('ratingSystem'),
+    ratingSql: document.getElementById('ratingSql'),
+    ratingComm: document.getElementById('ratingComm'),
+    strengths: document.getElementById('textStrengths'),
+    weaknesses: document.getElementById('textWeaknesses'),
+    remarks: document.getElementById('textRemarks'),
+    btnCopy: document.getElementById('btnCopy'),
+    btnDownload: document.getElementById('btnDownload'),
+    btnEmail: document.getElementById('btnEmail'),
+    toast: document.getElementById('toast')
+  };
+
+  const ADMIN_EMAIL = 'nnm23is186@nmamit.in';
+  const ratingSelects = [els.ratingCs, els.ratingCoding, els.ratingSystem, els.ratingSql, els.ratingComm];
+
+  function sanitizeUSN(raw) {
+    return raw.trim().replace(/[^a-zA-Z0-9]/g, '');
+  }
+
+  function syncRatingColor(sel) {
+    sel.setAttribute('data-val', sel.value);
+  }
+
+  function generateReportText() {
+    const nameVal = els.name.value.trim() || '[ Not Provided ]';
+    const usnVal = els.usn.value.trim() || '[ Not Provided ]';
+    const dayVal = els.day.value !== 'Select' ? els.day.value : '[ Not Selected ]';
+
+    const csVal = els.ratingCs.value;
+    const codingVal = els.ratingCoding.value;
+    const systemVal = els.ratingSystem.value;
+    const sqlVal = els.ratingSql.value;
+    const commVal = els.ratingComm.value;
+
+    const strVal = els.strengths.value.trim() || 'N/A';
+    const weakVal = els.weaknesses.value.trim() || 'N/A';
+    const remVal = els.remarks.value.trim() || 'N/A';
+
+    const now = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
+    return `==================================================
+CANDIDATE ASSESSMENT REPORT
+==================================================
+Candidate Name : ${nameVal}
+Candidate USN  : ${usnVal}
+Interview Day  : ${dayVal}
+--------------------------------------------------
+SKILL EVALUATIONS:
+- CS Fundamentals (DBMS, CN, OOPS, OS) : ${csVal}
+- Coding Questions                     : ${codingVal}
+- System Design                        : ${systemVal}
+- SQL                                  : ${sqlVal}
+- Communication                        : ${commVal}
+--------------------------------------------------
+STRENGTHS:
+${strVal}
+
+WEAKNESSES:
+${weakVal}
+
+REMARKS:
+${remVal}
+==================================================
+Generated Date : ${now}
+==================================================`;
+  }
+
+  function getFilename() {
+    const usn = sanitizeUSN(els.usn.value) || 'CandidateUSN';
+    const day = els.day.value !== 'Select' ? els.day.value : 'Day';
+    return `${usn}_${day}.txt`;
+  }
+
+  function copyReport() {
+    const text = generateReportText();
+    navigator.clipboard.writeText(text).then(showToast).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast();
+    });
+  }
+
+  function showToast() {
+    els.toast.style.color = '#3ddc84';
+    els.toast.textContent = 'Copied!';
+    els.toast.classList.add('show');
+    setTimeout(() => els.toast.classList.remove('show'), 2000);
+  }
+
+  function downloadReport() {
+    const text = generateReportText();
+    const filename = getFilename();
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  function sendEmail() {
+    const usn = sanitizeUSN(els.usn.value);
+    if (!usn) {
+      els.toast.style.color = '#ff5c5c';
+      els.toast.textContent = 'Enter USN first';
+      els.toast.classList.add('show');
+      setTimeout(() => els.toast.classList.remove('show'), 2500);
+      els.usn.focus();
+      return;
+    }
+    const studentEmail = `${usn}@nmamit.in`;
+    const nameVal = els.name.value.trim() || usn;
+    const dayVal = els.day.value !== 'Select' ? els.day.value : '';
+    const subject = `Interview Feedback - ${nameVal} (${usn})${dayVal ? ' - ' + dayVal : ''}`;
+    const body = generateReportText();
+
+    const gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1'
+      + '&to=' + encodeURIComponent(studentEmail)
+      + '&cc=' + encodeURIComponent(ADMIN_EMAIL)
+      + '&su=' + encodeURIComponent(subject)
+      + '&body=' + encodeURIComponent(body);
+
+    window.open(gmailUrl, '_blank');
+  }
+
+  ratingSelects.forEach(sel => {
+    sel.addEventListener('change', () => syncRatingColor(sel));
+  });
+
+  els.btnCopy.addEventListener('click', copyReport);
+  els.btnDownload.addEventListener('click', downloadReport);
+  els.btnEmail.addEventListener('click', sendEmail);
+</script>
+</body>
+</html>
