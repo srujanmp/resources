@@ -260,9 +260,10 @@
     <button id="btnCopy" class="btn-secondary" type="button">Copy Text</button>
     <button id="btnDownload" class="btn-primary" type="button">Download as .txt</button>
     <button id="btnEmail" class="btn-email" type="button">Send Email</button>
+    <button id="btnReset" class="btn-secondary" type="button">Reset</button>
     <span id="toast" class="toast">Copied!</span>
   </div>
-  <div class="hint">Send Email opens Gmail (mail.google.com) in a new tab, pre-filled to the student's USN address with the admin address CC'd.</div>
+  <div class="hint">Send Email opens Gmail on desktop and uses app-friendly compose links on mobile.</div>
 </div>
 
 <script>
@@ -281,11 +282,26 @@
     btnCopy: document.getElementById('btnCopy'),
     btnDownload: document.getElementById('btnDownload'),
     btnEmail: document.getElementById('btnEmail'),
+    btnReset: document.getElementById('btnReset'),
     toast: document.getElementById('toast')
   };
 
   const ADMIN_EMAIL = 'nnm23is186@nmamit.in';
+  const FORM_STATE_KEY = 'candidateAssessmentFormStateV1';
   const ratingSelects = [els.ratingCs, els.ratingCoding, els.ratingSystem, els.ratingSql, els.ratingComm];
+  const persistableFields = {
+    name: els.name,
+    usn: els.usn,
+    day: els.day,
+    ratingCs: els.ratingCs,
+    ratingCoding: els.ratingCoding,
+    ratingSystem: els.ratingSystem,
+    ratingSql: els.ratingSql,
+    ratingComm: els.ratingComm,
+    strengths: els.strengths,
+    weaknesses: els.weaknesses,
+    remarks: els.remarks
+  };
 
   function sanitizeUSN(raw) {
     return raw.trim().replace(/[^a-zA-Z0-9]/g, '');
@@ -293,6 +309,55 @@
 
   function syncRatingColor(sel) {
     sel.setAttribute('data-val', sel.value);
+  }
+
+  function saveFormState() {
+    const state = {};
+    Object.entries(persistableFields).forEach(([key, field]) => {
+      state[key] = field.value;
+    });
+    try {
+      localStorage.setItem(FORM_STATE_KEY, JSON.stringify(state));
+    } catch (_) {}
+  }
+
+  function loadFormState() {
+    let saved;
+    try {
+      saved = localStorage.getItem(FORM_STATE_KEY);
+    } catch (_) {
+      return;
+    }
+    if (!saved) return;
+    try {
+      const parsed = JSON.parse(saved);
+      Object.entries(persistableFields).forEach(([key, field]) => {
+        if (typeof parsed[key] === 'string') {
+          field.value = parsed[key];
+        }
+      });
+    } catch (_) {}
+  }
+
+  function resetForm() {
+    els.name.value = '';
+    els.usn.value = '';
+    els.day.value = 'Select';
+    ratingSelects.forEach(sel => {
+      sel.value = 'Select';
+      syncRatingColor(sel);
+    });
+    els.strengths.value = '';
+    els.weaknesses.value = '';
+    els.remarks.value = '';
+    try {
+      localStorage.removeItem(FORM_STATE_KEY);
+    } catch (_) {}
+    els.toast.style.color = '#3ddc84';
+    els.toast.textContent = 'Form reset';
+    els.toast.classList.add('show');
+    setTimeout(() => els.toast.classList.remove('show'), 2000);
+    els.name.focus();
   }
 
   function generateReportText() {
@@ -394,23 +459,55 @@ Generated Date : ${now}
     const dayVal = els.day.value !== 'Select' ? els.day.value : '';
     const subject = `Interview Feedback - ${nameVal} (${usn})${dayVal ? ' - ' + dayVal : ''}`;
     const body = generateReportText();
+    const subjectEncoded = encodeURIComponent(subject);
+    const bodyEncoded = encodeURIComponent(body);
+    const toEncoded = encodeURIComponent(studentEmail);
+    const ccEncoded = encodeURIComponent(ADMIN_EMAIL);
 
     const gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1'
-      + '&to=' + encodeURIComponent(studentEmail)
-      + '&cc=' + encodeURIComponent(ADMIN_EMAIL)
-      + '&su=' + encodeURIComponent(subject)
-      + '&body=' + encodeURIComponent(body);
+      + '&to=' + toEncoded
+      + '&cc=' + ccEncoded
+      + '&su=' + subjectEncoded
+      + '&body=' + bodyEncoded;
 
-    window.open(gmailUrl, '_blank');
+    const mailtoUrl = `mailto:${studentEmail}?cc=${ccEncoded}&subject=${subjectEncoded}&body=${bodyEncoded}`;
+    const ua = navigator.userAgent || '';
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
+
+    if (isMobile) {
+      if (/iPhone|iPad|iPod/i.test(ua)) {
+        const gmailIosUrl = `googlegmail:///co?to=${toEncoded}&cc=${ccEncoded}&subject=${subjectEncoded}&body=${bodyEncoded}`;
+        window.location.href = gmailIosUrl;
+        setTimeout(() => { window.location.href = mailtoUrl; }, 700);
+      } else if (/Android/i.test(ua)) {
+        const gmailAndroidIntent = `intent://co?to=${toEncoded}&cc=${ccEncoded}&subject=${subjectEncoded}&body=${bodyEncoded}#Intent;scheme=googlegmail;package=com.google.android.gm;end`;
+        window.location.href = gmailAndroidIntent;
+        setTimeout(() => { window.location.href = mailtoUrl; }, 700);
+      } else {
+        window.location.href = mailtoUrl;
+      }
+      return;
+    }
+
+    window.open(gmailUrl, '_blank', 'noopener');
   }
 
   ratingSelects.forEach(sel => {
     sel.addEventListener('change', () => syncRatingColor(sel));
   });
 
+  Object.values(persistableFields).forEach(field => {
+    field.addEventListener('input', saveFormState);
+    field.addEventListener('change', saveFormState);
+  });
+
+  loadFormState();
+  ratingSelects.forEach(syncRatingColor);
+
   els.btnCopy.addEventListener('click', copyReport);
   els.btnDownload.addEventListener('click', downloadReport);
   els.btnEmail.addEventListener('click', sendEmail);
+  els.btnReset.addEventListener('click', resetForm);
 </script>
 </body>
 </html>
