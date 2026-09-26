@@ -20,6 +20,7 @@
 - [NeetCode 150 Practice](https://neetcode.io/practice?tab=neetcode150)
 
 ## 6. System Design
+- [Neetcode SystemDesignSchool](https://neetcode.io/practice/practice/systemDesign)
 - [System Design Guidelines](./SYSTEM_DESIGN.md)
 
 ## 7. Interview Preparation
