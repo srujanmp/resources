@@ -127,8 +127,8 @@
   }
   .buttons {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
     gap: 10px;
   }
   button {
@@ -159,11 +159,30 @@
     border-color: #ff5c5c;
   }
   .btn-email:hover { background: #240d0c; }
+  .btn-main {
+    background: #17c964;
+    color: #06170d;
+    border-color: #17c964;
+    padding: 16px 18px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .btn-main:hover { background: #3ddc84; }
+  .btn-mode {
+    font-size: 10.5px;
+    font-weight: 500;
+    opacity: 0.65;
+    margin-left: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
   .toast {
     font-size: 12px;
     font-weight: 500;
     color: #3ddc84;
     opacity: 0;
+    text-align: center;
     transition: opacity 0.2s;
   }
   .toast.show { opacity: 1; }
@@ -237,6 +256,12 @@
           <option value="Select">Select</option><option value="Strong">Strong</option><option value="Good">Good</option><option value="Needs Practice">Needs Practice</option>
         </select>
       </div>
+      <div class="field">
+        <label for="ratingHr">Behavioral &amp; HR</label>
+        <select id="ratingHr" class="skill-rating" data-val="Select">
+          <option value="Select">Select</option><option value="Strong">Strong</option><option value="Good">Good</option><option value="Needs Practice">Needs Practice</option>
+        </select>
+      </div>
     </div>
   </div>
 
@@ -257,12 +282,13 @@
   </div>
 
   <div class="buttons">
+    <button id="btnDownloadHtml" class="btn-secondary" type="button">Download HTML <span class="btn-mode">(for offline mode)</span></button>
+    <button id="btnEmail" class="btn-main" type="button">Send Email</button>
+    <button id="btnDownload" class="btn-secondary" type="button">Download as .txt <span class="btn-mode">(offline mode)</span></button>
     <button id="btnCopy" class="btn-secondary" type="button">Copy Text</button>
-    <button id="btnDownload" class="btn-primary" type="button">Download as .txt</button>
-    <button id="btnEmail" class="btn-email" type="button">Send Email</button>
     <span id="toast" class="toast">Copied!</span>
   </div>
-  <div class="hint">Send Email opens Gmail (mail.google.com) in a new tab, pre-filled to the student's USN address with the admin address CC'd.</div>
+  <div class="hint">Send Email opens Gmail (mail.google.com) in a new tab on desktop, or your device's mail app on mobile, pre-filled to the student's USN address with the admin address CC'd.</div>
 </div>
 
 <script>
@@ -275,17 +301,19 @@
     ratingSystem: document.getElementById('ratingSystem'),
     ratingSql: document.getElementById('ratingSql'),
     ratingComm: document.getElementById('ratingComm'),
+    ratingHr: document.getElementById('ratingHr'),
     strengths: document.getElementById('textStrengths'),
     weaknesses: document.getElementById('textWeaknesses'),
     remarks: document.getElementById('textRemarks'),
     btnCopy: document.getElementById('btnCopy'),
     btnDownload: document.getElementById('btnDownload'),
+    btnDownloadHtml: document.getElementById('btnDownloadHtml'),
     btnEmail: document.getElementById('btnEmail'),
     toast: document.getElementById('toast')
   };
 
   const ADMIN_EMAIL = 'nnm23is186@nmamit.in';
-  const ratingSelects = [els.ratingCs, els.ratingCoding, els.ratingSystem, els.ratingSql, els.ratingComm];
+  const ratingSelects = [els.ratingCs, els.ratingCoding, els.ratingSystem, els.ratingSql, els.ratingComm, els.ratingHr];
 
   function sanitizeUSN(raw) {
     return raw.trim().replace(/[^a-zA-Z0-9]/g, '');
@@ -305,6 +333,7 @@
     const systemVal = els.ratingSystem.value;
     const sqlVal = els.ratingSql.value;
     const commVal = els.ratingComm.value;
+    const hrVal = els.ratingHr.value;
 
     const strVal = els.strengths.value.trim() || 'N/A';
     const weakVal = els.weaknesses.value.trim() || 'N/A';
@@ -325,6 +354,7 @@ SKILL EVALUATIONS:
 - System Design                        : ${systemVal}
 - SQL                                  : ${sqlVal}
 - Communication                        : ${commVal}
+- Behavioral & HR                      : ${hrVal}
 --------------------------------------------------
 STRENGTHS:
 ${strVal}
@@ -379,6 +409,19 @@ Generated Date : ${now}
     URL.revokeObjectURL(url);
   }
 
+  function downloadHtml() {
+    const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'candidate-assessment-report.html';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
   function sendEmail() {
     const usn = sanitizeUSN(els.usn.value);
     if (!usn) {
@@ -395,13 +438,22 @@ Generated Date : ${now}
     const subject = `Interview Feedback - ${nameVal} (${usn})${dayVal ? ' - ' + dayVal : ''}`;
     const body = generateReportText();
 
-    const gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1'
-      + '&to=' + encodeURIComponent(studentEmail)
-      + '&cc=' + encodeURIComponent(ADMIN_EMAIL)
-      + '&su=' + encodeURIComponent(subject)
-      + '&body=' + encodeURIComponent(body);
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
-    window.open(gmailUrl, '_blank');
+    if (isMobile) {
+      const mailtoUrl = 'mailto:' + encodeURIComponent(studentEmail)
+        + '?cc=' + encodeURIComponent(ADMIN_EMAIL)
+        + '&subject=' + encodeURIComponent(subject)
+        + '&body=' + encodeURIComponent(body);
+      window.location.href = mailtoUrl;
+    } else {
+      const gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1'
+        + '&to=' + encodeURIComponent(studentEmail)
+        + '&cc=' + encodeURIComponent(ADMIN_EMAIL)
+        + '&su=' + encodeURIComponent(subject)
+        + '&body=' + encodeURIComponent(body);
+      window.open(gmailUrl, '_blank');
+    }
   }
 
   ratingSelects.forEach(sel => {
@@ -410,6 +462,7 @@ Generated Date : ${now}
 
   els.btnCopy.addEventListener('click', copyReport);
   els.btnDownload.addEventListener('click', downloadReport);
+  els.btnDownloadHtml.addEventListener('click', downloadHtml);
   els.btnEmail.addEventListener('click', sendEmail);
 </script>
 </body>
