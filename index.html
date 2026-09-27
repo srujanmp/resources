@@ -464,6 +464,46 @@ Generated Date : ${now}
   els.btnDownload.addEventListener('click', downloadReport);
   els.btnDownloadHtml.addEventListener('click', downloadHtml);
   els.btnEmail.addEventListener('click', sendEmail);
+
+  // --- Persistence (localStorage) ---
+  const STORAGE_KEY = 'candidateAssessmentReport';
+  const persistFields = [
+    'name', 'usn', 'day',
+    'ratingCs', 'ratingCoding', 'ratingSystem', 'ratingSql', 'ratingComm', 'ratingHr',
+    'strengths', 'weaknesses', 'remarks'
+  ];
+
+  function saveState() {
+    try {
+      const state = {};
+      persistFields.forEach(key => { state[key] = els[key].value; });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) { /* storage unavailable, ignore */ }
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const state = JSON.parse(raw);
+      persistFields.forEach(key => {
+        if (state[key] !== undefined && els[key]) {
+          els[key].value = state[key];
+        }
+      });
+      ratingSelects.forEach(sel => syncRatingColor(sel));
+    } catch (e) { /* corrupt or unavailable, ignore */ }
+  }
+
+  persistFields.forEach(key => {
+    const el = els[key];
+    if (el) {
+      el.addEventListener('input', saveState);
+      el.addEventListener('change', saveState);
+    }
+  });
+
+  loadState();
 </script>
 </body>
 </html>
