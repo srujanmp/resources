@@ -26,4 +26,4 @@
 ## 7. Interview Preparation
 - **Self-Introduction:** Prepare a concise summary of your background, experience, and career objectives.
 - **Project Discussion:** Thoroughly understand your projects and be prepared to discuss them in detail.
-- **Self-Intro & Interview Guide:** [Self_Intro_Interview_Guide.docx.pdf](./Self_Intro_Interview_Guide.docx.pdf)
+- **Self-Intro & Interview Guide:** [Self_Intro_Interview_Guide](./Self_Intro_Interview_Guide.pdf)
